@@ -1,0 +1,64 @@
+---
+version: "2.0"
+services:
+  db:
+    image: mysql:5.7
+    env:
+      - MYSQL_ROOT_PASSWORD=yourrootpassword
+      - MYSQL_DATABASE=modx
+      - MYSQL_USER=yourmodxuser
+      - MYSQL_PASSWORD=modxsecurepassword
+    expose:
+      - port: 3306
+        to:
+          - global: true
+  modx:
+    depends-on:
+      - db
+    image: yourusername/akashmodx:latest
+    expose:
+      - port: 80
+        accept:
+          - yourdomain.com
+        to:
+          - global: true
+        http_options:
+          max_body_size: 3145728
+          read_timeout: 50000
+          send_timeout: 51000
+profiles:
+  compute:
+    db:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 512Mi
+        storage:
+          size: 512Mi
+    modx:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 2Gi
+        storage:
+          size: 2Gi
+  placement:
+    westcoast:
+      pricing:
+        db:
+          denom: uakt
+          amount: 5000
+        modx:
+          denom: uakt
+          amount: 5000
+deployment:
+  db:
+    westcoast:
+      profile: db
+      count: 1
+  modx:
+    westcoast:
+      profile: modx
+      count: 1
